@@ -75,9 +75,7 @@ def train(args):
     if args.debug:
         train_scene_list = ["scene0000_00"]
         val_scene_list = ["scene0000_00"]
-    else:
-        #train_scene_list = get_scene_list(CONF.SCANNETV2_TRAIN)
-        #val_scene_list = get_scene_list(CONF.SCANNETV2_VAL)
+
 
     # dataloader
     if args.wholescene:
