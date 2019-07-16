@@ -19,7 +19,7 @@ from lib.loss import WeightedCrossEntropyLoss
 from lib.config import CONF
 
 
-input_folder = "/home/lorenzlamm/Dokumente/DavesPointnet/Pointnet2.ScanNet/data"
+input_folder = "/workspace/pointnet_train/pn_train_data"
 
 def get_dataloader(args, scene_list, is_train=True, is_wholescene=False):
     if is_wholescene:
