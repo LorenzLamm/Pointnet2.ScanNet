@@ -11,6 +11,6 @@ class WeightedCrossEntropyLoss(nn.Module):
         assert inputs.size(0) == targets.size(0) == weights.size(0)
         
         loss = F.cross_entropy(input=inputs, target=targets, reduction="none", ignore_index=self.ignore_index)
-        loss = torch.mean(loss * weights)
+        loss = torch.mean(loss * weights.float())
 
         return loss

@@ -9,6 +9,8 @@ import torch.optim as optim
 import numpy as np
 from datetime import datetime
 from torch.utils.data import DataLoader
+from data.Indoor3DSemSegLoader import Indoor3DSemSeg
+
 
 sys.path.append(".")
 from lib.solver import Solver
@@ -16,6 +18,8 @@ from lib.dataset import ScannetDataset, ScannetDatasetWholeScene, collate_random
 from lib.loss import WeightedCrossEntropyLoss
 from lib.config import CONF
 
+
+input_folder = "/home/lorenzlamm/Dokumente/DavesPointnet/Pointnet2.ScanNet/data"
 
 def get_dataloader(args, scene_list, is_train=True, is_wholescene=False):
     if is_wholescene:
@@ -72,17 +76,33 @@ def train(args):
         train_scene_list = ["scene0000_00"]
         val_scene_list = ["scene0000_00"]
     else:
-        train_scene_list = get_scene_list(CONF.SCANNETV2_TRAIN)
-        val_scene_list = get_scene_list(CONF.SCANNETV2_VAL)
+        print("HI")
+        #train_scene_list = get_scene_list(CONF.SCANNETV2_TRAIN)
+        #val_scene_list = get_scene_list(CONF.SCANNETV2_VAL)
 
     # dataloader
     if args.wholescene:
         is_wholescene = True
     else:
         is_wholescene = False
-
-    train_dataset, train_dataloader = get_dataloader(args, train_scene_list, True, is_wholescene)
-    val_dataset, val_dataloader = get_dataloader(args, val_scene_list, True, is_wholescene)
+    train_dataset = Indoor3DSemSeg(4096, root=input_folder, train=True)
+    val_dataset = Indoor3DSemSeg(4096, root=input_folder, train=False)
+    val_dataloader = DataLoader(
+        val_dataset,
+        batch_size=args.batch_size,
+        shuffle=True,
+        pin_memory=True,
+        num_workers=2,
+    )
+    train_dataloader = DataLoader(
+        train_dataset,
+        batch_size=args.batch_size,
+        pin_memory=True,
+        num_workers=2,
+        shuffle=True,
+    )
+#    train_dataset, train_dataloader = get_dataloader(args, train_scene_list, True, is_wholescene)
+#    val_dataset, val_dataloader = get_dataloader(args, val_scene_list, True, is_wholescene)
     dataloader = {
         "train": train_dataloader,
         "val": val_dataloader
@@ -107,15 +127,16 @@ def train(args):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--gpu', type=str, help='gpu', default='0')
-    parser.add_argument('--batch_size', type=int, help='batch size', default=1)
+    parser.add_argument('--batch_size', type=int, help='batch size', default=2)
     parser.add_argument('--epoch', type=int, help='number of epochs', default=10)
     parser.add_argument('--verbose', type=int, help='iterations of showing verbose', default=1)
-    parser.add_argument('--lr', type=float, help='learning rate', default=5e-5)
+    parser.add_argument('--lr', type=float, help='learning rate', default=5e-3)
     parser.add_argument('--wd', type=float, help='weight decay', default=0)
     parser.add_argument('--bn', type=bool, help='batch norm', default=True)
     parser.add_argument("--debug", action="store_true")
     parser.add_argument("--wholescene", action="store_true")
     args = parser.parse_args()
+
 
     # setting
     os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu

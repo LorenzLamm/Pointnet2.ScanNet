@@ -125,12 +125,12 @@ class Solver():
             coord_chunk, feat_chunk = torch.split(coord.squeeze(0), self.batch_size, 0), torch.split(feat.squeeze(0), self.batch_size, 0)
             assert len(coord_chunk) == len(feat_chunk)
             for coord, feat in zip(coord_chunk, feat_chunk):
-                output = self.model(torch.cat([coord, feat], dim=2))
+                output = self.model(coord, feat)
                 pred.append(output)
 
             pred = torch.cat(pred, dim=0)
         else:
-            output = self.model(torch.cat([coord, feat], dim=2))
+            output = self.model(coord)
             pred = output
 
         return pred
@@ -222,6 +222,7 @@ class Solver():
             "miou": []
         }
         for iter_id, data in enumerate(val_loader):
+
             # initialize the running loss
             self._running_log = {
                 # loss
@@ -322,8 +323,11 @@ class Solver():
         forward_time = [time for time in self.log["train"][epoch_id]["forward"]]
         backward_time = [time for time in self.log["train"][epoch_id]["backward"]]
         iter_time = [time for time in self.log["train"][epoch_id]["iter_time"]]
-        mean_train_time = np.mean(iter_time)
-        mean_est_val_time = np.mean([fetch + forward for fetch, forward in zip(fetch_time, forward_time)])
+        print(iter_time[0])
+        print(fetch_time)
+        print(forward_time)
+        mean_train_time = np.mean(iter_time[0].numpy())
+        mean_est_val_time = np.mean([fetch + forward for fetch, forward in zip(fetch_time[0], forward_time)])
         eta_sec = (self._total_iter["train"] - self._global_iter_id - 1) * mean_train_time
         eta_sec += len(self.dataloader["val"]) * (self.epoch - epoch_id) * mean_est_val_time
         eta = decode_eta(eta_sec)
@@ -335,10 +339,10 @@ class Solver():
             train_loss=round(np.mean([loss for loss in self.log["train"][epoch_id]["loss"]]), 5),
             train_acc=round(np.mean([loss for loss in self.log["train"][epoch_id]["acc"]]), 5),
             train_miou=round(np.mean([loss for loss in self.log["train"][epoch_id]["miou"]]), 5),
-            mean_fetch_time=round(np.mean(fetch_time), 5),
+            mean_fetch_time=round(np.mean(fetch_time[0].numpy()), 5),
             mean_forward_time=round(np.mean(forward_time), 5),
             mean_backward_time=round(np.mean(backward_time), 5),
-            mean_iter_time=round(np.mean(iter_time), 5),
+            mean_iter_time=round(np.mean(iter_time[0].numpy()), 5),
             eta_h=eta["h"],
             eta_m=eta["m"],
             eta_s=eta["s"]

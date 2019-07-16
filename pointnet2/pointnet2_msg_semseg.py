@@ -4,7 +4,7 @@ from pointnet2_modules import PointnetFPModule, PointnetSAModuleMSG
 import pytorch_utils as pt_utils
 
 
-def get_model(num_classes, input_channels=3, use_xyz=True, bn=True):
+def get_model(num_classes, input_channels=0, use_xyz=True, bn=True):
     return Pointnet2MSG(
         num_classes=num_classes, 
         input_channels=input_channels, 
