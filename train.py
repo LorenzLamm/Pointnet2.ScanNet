@@ -76,7 +76,6 @@ def train(args):
         train_scene_list = ["scene0000_00"]
         val_scene_list = ["scene0000_00"]
     else:
-        print("HI")
         #train_scene_list = get_scene_list(CONF.SCANNETV2_TRAIN)
         #val_scene_list = get_scene_list(CONF.SCANNETV2_VAL)
 
