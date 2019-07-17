@@ -261,8 +261,9 @@ class Solver():
 
             # save model
             print("saving models...\n")
-            model_root = os.path.join(CONF.OUTPUT_ROOT, self.stamp)
-            torch.save(self.model.state_dict(), os.path.join(model_root, "model.pth"))
+            if(epoch_id % 5 == 0):
+                model_root = os.path.join(CONF.OUTPUT_ROOT, self.stamp)
+                torch.save(self.model.state_dict(), os.path.join(model_root, str(epoch_id) + "model.pth"))
 
     def _eval(self, preds, targets):
         if self.is_wholescene:
@@ -281,7 +282,10 @@ class Solver():
             # if i == 0: continue
             pred_ids = torch.arange(preds.view(-1).size(0))[preds.view(-1) == i].tolist()
             target_ids = torch.arange(targets.view(-1).size(0))[targets.view(-1) == i].tolist()
-            if len(target_ids) == 0: continue
+            if len(target_ids) == 0:
+                if(len(pred_ids != 0)): ## added these 2 lines: Before, we did not incorporate classes that were predicted, but did not appear.
+                    miou.append(0)      ## Not sure if it makes sense to include this
+                continue
             num_correct = len(set(pred_ids).intersection(set(target_ids)))
             num_union = len(set(pred_ids).union(set(target_ids)))
             miou.append(num_correct / (num_union + 1e-8))

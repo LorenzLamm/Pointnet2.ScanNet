@@ -5,8 +5,9 @@ import numpy as np
 import torch
 from torch.utils.data import DataLoader
 
-from PointNet2ScanNetDataset import ScannetDatasetWholeScene, collate_wholescene
-from pc_util import point_cloud_label_to_surface_voxel_label_fast
+from lib.dataset import ScannetDatasetWholeScene, collate_wholescene
+from lib.pc_util import point_cloud_label_to_surface_voxel_label_fast
+from lib.config import CONF
 
 # for PointNet2.PyTorch module
 import sys
@@ -87,7 +88,7 @@ def eval_one_batch(args, model, data):
 
     # feed
     preds = forward(args, model, coords, feats)
-
+    print(preds.shape)
     # eval
     coords = coords.squeeze(0).cpu().numpy()     # (CK, N, C)
     preds = preds.squeeze(0).cpu().numpy()       # (CK, N, C)
@@ -119,7 +120,14 @@ def eval_wholescene(args, model, dataloader):
 def evaluate(args):
     # prepare data
     print("preparing data...")
-    scene_list = get_scene_list("python/Mesh2Loc/data/scannetv2_val.txt")
+    #scene_list = get_scene_list("python/Mesh2Loc/data/scannetv2_val.txt")
+    scene_list = list()
+    scene_list.append("scene0000_00")
+    scene_list.append("scene0000_02")
+    scene_list.append("scene0000_03")
+    scene_list.append("scene0000_04")
+    scene_list.append("scene0000_01")
+    print("/home/lorenzlamm/Dokumente/DavesPointnetClone/Pointnet2.ScanNet/preprocessing/scannet_scenes")
     dataset = ScannetDatasetWholeScene(scene_list, is_train=False)
     dataloader = DataLoader(dataset, batch_size=1, collate_fn=collate_wholescene)
 
@@ -146,11 +154,11 @@ def evaluate(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--folder', type=str, help='output folder containing the best model from training', required=True)
+    parser.add_argument('--folder', type=str, help='output folder containing the best model from training', required=False)
     parser.add_argument('--batch_size', type=int, help='size of the batch/chunk', default=8)
     parser.add_argument('--gpu', type=str, help='gpu', default='0')
     args = parser.parse_args()
-
+    args.folder = "/home/lorenzlamm/Dokumente/DavesPointnetClone/Pointnet2.ScanNet"
     # setting
     os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu
     os.environ["CUDA_LAUNCH_BLOCKING"] = "1"

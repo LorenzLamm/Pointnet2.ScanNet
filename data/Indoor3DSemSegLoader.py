@@ -74,12 +74,14 @@ class Indoor3DSemSeg(data.Dataset):
         data_batchlist, label_batchlist = [], []
         for f in all_files:
             data, label = _load_data_file(f)
+            if(len(data.shape) == 2):
+                data = np.expand_dims(data, axis=0)
+                label = np.expand_dims(label, axis=0)
             data_batchlist.append(data)
             label_batchlist.append(label)
 
         data_batches = np.concatenate(data_batchlist, 0)
         labels_batches = np.concatenate(label_batchlist, 0)
-
 
 
 
@@ -141,7 +143,6 @@ class Indoor3DSemSeg(data.Dataset):
         start = time.time()
         pt_idxs = np.arange(0, self.num_points)
         np.random.shuffle(pt_idxs)
-
         current_points = torch.from_numpy(self.points[idx, pt_idxs].copy()).type(
             torch.FloatTensor
         )

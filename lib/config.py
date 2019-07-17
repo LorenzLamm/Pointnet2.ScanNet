@@ -4,9 +4,9 @@ from easydict import EasyDict
 CONF = EasyDict()
 
 # BASE PATH
-CONF.ROOT = "/home/lorenzlamm/Dokumente/DavesPointnet/Pointnet2.ScanNet" # TODO change this
-CONF.SCANNET_DIR =  "/mnt/canis/Datasets/ScanNet/public/v2/scans" # TODO change this
-#CONF.SCENE_NAMES = os.listdir('/mnt/canis/Datasets/ScanNet/public/v1/scans') # TODO change
+CONF.ROOT = "/home/lorenzlamm/Dokumente/DavesPointnetClone/Pointnet2.ScanNet" # TODO change this
+CONF.SCANNET_DIR =  "/home/lorenzlamm/Downloads/scans/scans" # TODO change this
+CONF.SCENE_NAMES = os.listdir('/home/lorenzlamm/Downloads/scans/scans') # TODO change
 
 CONF.PREP = os.path.join(CONF.ROOT, "preprocessing")
 CONF.PREP_SCANS = os.path.join(CONF.PREP, "scannet_scenes")

@@ -124,6 +124,72 @@ def train(args):
     save_info(args, root, train_examples, val_examples, num_params)
     solver(args.epoch, args.verbose)
 
+def predForVisualization(args):
+    test_dataset = Indoor3DSemSeg(16384*2, root="/home/lorenzlamm/Dokumente/DavesPointnetClone/Pointnet2.ScanNet/preprocessing/scannet_scenes", train=False)
+
+    weight = test_dataset.labelweights
+    train_examples = len(test_dataset)
+
+    print("initializing...")
+    stamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+    root = os.path.join(CONF.OUTPUT_ROOT, stamp)
+    os.makedirs(root, exist_ok=True)
+
+    model_path = os.path.join(CONF.OUTPUT_ROOT, args.folder, "model.pth")
+    sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'pointnet2/'))
+    Pointnet = importlib.import_module("pointnet2_msg_semseg")
+    model = Pointnet.get_model(num_classes=21).cuda()
+    model.load_state_dict(torch.load(model_path))
+    model.eval()
+    sceneCount = 0
+    for i in range(len(test_dataset)):
+        coords, feats, semantic_segs, sample_weights, fetch_time = test_dataset[i]
+        coords, feats, semantic_segs, sample_weights = torch.tensor(coords).cuda(), torch.tensor(
+            feats).cuda(), torch.tensor(semantic_segs).cuda(), torch.tensor(sample_weights).cuda()
+        output = model(coords.unsqueeze(0))
+        preds = torch.argmax(output, dim=2)
+        preds = torch.cuda.FloatTensor(preds.float())
+        if (sceneCount == 0):
+            print(coords.squeeze(0).shape)
+            print(torch.cuda.FloatTensor(preds.squeeze().unsqueeze(1)).shape)
+            all_points = torch.cat((coords.squeeze(0), torch.cuda.FloatTensor(preds.squeeze().unsqueeze(1))), dim=1)
+        else:
+            all_points = torch.cat((all_points, torch.cat((coords.squeeze(0), torch.cuda.FloatTensor(preds.squeeze().unsqueeze(1))), dim=1)), dim=0)
+        print(all_points.shape)
+        sceneCount += 1
+
+    unique_points = torch.unique(all_points, dim=-2)
+    print(unique_points.shape)
+    final_points = unique_points.clone()
+    for i in range(unique_points.shape[0]):
+        point = unique_points[i, :3]
+        mask = torch.sum(all_points[:, :3] == point, dim=1)
+        pointMask = mask == 3
+        points = all_points[pointMask]
+        point_counts = torch.zeros(21)
+        for point in points:
+            for j in range(21):
+                if (point[3] == j):
+                    point_counts[j] += 1
+        final_points[i, 3] = torch.argmax(point_counts)
+        if (i % 300 == 0):
+            print(i)
+    torch.save(final_points, "/home/lorenzlamm/Dokumente/DavesPointnetClone/Pointnet2.ScanNet/preprocessing/scannet_scenes/final_scene.torch")
+    write_torch_to_text("/home/lorenzlamm/Dokumente/DavesPointnetClone/Pointnet2.ScanNet/preprocessing/scannet_scenes/final_scene.torch", "/home/lorenzlamm/Dokumente/DavesPointnetClone/Pointnet2.ScanNet/preprocessing/scannet_scenes/final_scene.txt")
+    write_np_to_text("/home/lorenzlamm/Dokumente/DavesPointnetClone/Pointnet2.ScanNet/preprocessing/scannet_scenes/whole_scene/scene0700_00.npy", "/home/lorenzlamm/Dokumente/DavesPointnetClone/Pointnet2.ScanNet/preprocessing/scannet_scenes/scene0700_00.txt")
+
+def write_torch_to_text(filename, outname):
+    file = torch.load(filename).cpu().numpy()
+    with open(outname, "w+") as f:
+        for i in range(file.shape[0]):
+            f.write(str(file[i][0]) + " " + str(file[i][1]) + " " + str(file[i][2]) + " " + str(file[i][3]) + "\n")
+
+def write_np_to_text(filename, outname, index=7):
+    file = np.load(filename)
+    with open(outname, "w+") as f:
+        for i in range(file.shape[0]):
+            f.write(str(file[i][0]) + " " + str(file[i][1]) + " " + str(file[i][2]) + " " + str(file[i][index]) + "\n")
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--gpu', type=str, help='gpu', default='0')
@@ -136,10 +202,11 @@ if __name__ == '__main__':
     parser.add_argument("--debug", action="store_true")
     parser.add_argument("--wholescene", action="store_true")
     args = parser.parse_args()
-
+    args.folder = "/home/lorenzlamm/Dokumente/DavesPointnetClone/Pointnet2.ScanNet"
 
     # setting
     os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu
     os.environ["CUDA_LAUNCH_BLOCKING"] = "1"
 
-    train(args)
+    #train(args)
+    predForVisualization(args)

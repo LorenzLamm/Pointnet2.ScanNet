@@ -150,7 +150,7 @@ class ScannetDatasetWholeScene():
         sample_weights = np.concatenate(tuple(sample_weights),axis=0)
 
         fetch_time = time.time() - start
-
+        point_sets = point_sets[:,:,:3]
         return point_sets, semantic_segs, sample_weights, fetch_time
 
     def __len__(self):
@@ -233,5 +233,4 @@ def collate_wholescene(data):
         sample_weights,     # (B, N)
         sum(fetch_time)          # float
     )
-
     return batch
