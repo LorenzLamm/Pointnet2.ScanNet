@@ -26,7 +26,6 @@ def _load_data_file(name):
     f = h5py.File(name)
     data = f["points"][:]
     label = f["labels"][:]
-    print(np.unique(label))
     return data, label
 
 
@@ -87,9 +86,6 @@ class Indoor3DSemSeg(data.Dataset):
 
         labels_unique = np.unique(labels_batches)
         labels_unique_count = np.stack([(labels_batches == labels_u).sum() for labels_u in labels_unique])
-        print('count of labels: ')  # , labels_unique_count)
-        for i in range(labels_unique_count.shape[0]):
-            print(i + 1, labels_unique_count[i])
 
         labelSum = labels_unique_count.sum()
         self.labelweights = np.zeros(21)

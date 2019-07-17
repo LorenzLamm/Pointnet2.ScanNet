@@ -327,9 +327,6 @@ class Solver():
         forward_time = [time for time in self.log["train"][epoch_id]["forward"]]
         backward_time = [time for time in self.log["train"][epoch_id]["backward"]]
         iter_time = [time for time in self.log["train"][epoch_id]["iter_time"]]
-        print(iter_time[0])
-        print(fetch_time)
-        print(forward_time)
         mean_train_time = np.mean(iter_time[0].numpy())
         mean_est_val_time = np.mean([fetch + forward for fetch, forward in zip(fetch_time[0], forward_time)])
         eta_sec = (self._total_iter["train"] - self._global_iter_id - 1) * mean_train_time

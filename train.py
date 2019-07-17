@@ -19,7 +19,7 @@ from lib.loss import WeightedCrossEntropyLoss
 from lib.config import CONF
 
 
-input_folder = "/home/lorenzlamm/Dokumente/DavesPointnet/Pointnet2.ScanNet/data"
+input_folder = "/workspace/pointnet_train/pn_train_data"
 
 def get_dataloader(args, scene_list, is_train=True, is_wholescene=False):
     if is_wholescene:
@@ -75,10 +75,7 @@ def train(args):
     if args.debug:
         train_scene_list = ["scene0000_00"]
         val_scene_list = ["scene0000_00"]
-    else:
-        print("HI")
-        #train_scene_list = get_scene_list(CONF.SCANNETV2_TRAIN)
-        #val_scene_list = get_scene_list(CONF.SCANNETV2_VAL)
+
 
     # dataloader
     if args.wholescene:
@@ -208,5 +205,9 @@ if __name__ == '__main__':
     os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu
     os.environ["CUDA_LAUNCH_BLOCKING"] = "1"
 
+<<<<<<< HEAD
     #train(args)
     predForVisualization(args)
+=======
+    train(args)
+>>>>>>> 492875351ce329ba901829f996103c7bd052e9be
