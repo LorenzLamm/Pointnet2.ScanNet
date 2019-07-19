@@ -205,9 +205,6 @@ if __name__ == '__main__':
     os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu
     os.environ["CUDA_LAUNCH_BLOCKING"] = "1"
 
-<<<<<<< HEAD
     #train(args)
     predForVisualization(args)
-=======
     train(args)
->>>>>>> 492875351ce329ba901829f996103c7bd052e9be
