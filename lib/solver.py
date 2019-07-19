@@ -283,7 +283,7 @@ class Solver():
             pred_ids = torch.arange(preds.view(-1).size(0))[preds.view(-1) == i].tolist()
             target_ids = torch.arange(targets.view(-1).size(0))[targets.view(-1) == i].tolist()
             if len(target_ids) == 0:
-                if(len(pred_ids != 0)): ## added these 2 lines: Before, we did not incorporate classes that were predicted, but did not appear.
+                if(len(pred_ids) != 0): ## added these 2 lines: Before, we did not incorporate classes that were predicted, but did not appear.
                     miou.append(0)      ## Not sure if it makes sense to include this
                 continue
             num_correct = len(set(pred_ids).intersection(set(target_ids)))
